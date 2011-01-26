@@ -13,7 +13,12 @@
 	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
 	http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
 	"
-	default-autowire="byName">	
+	default-autowire="byName">
+	
+	<!-- use an external property-placeholder file  -->
+	<bean	class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:spring.properties" />
+	</bean>
 	
 	<!-- holding properties for database connectivity
 	<context:property-placeholder location="classpath:jdbc.properties" />
@@ -24,19 +29,25 @@
 	
 	<!-- enabling annotation driven configuration / -->
 	<context:annotation-config />	
-	<context:component-scan base-package="com.fisher" />
+	<context:component-scan base-package="com.soap.rest" />
 	
-	<!-- cxf*.xml provided by CXF library jars - NO NEED TO CREATE THESE! -->
+	<!-- cxf*.xml provided by CXF library jars - NO NEED TO SOURCE THESE! -->
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
 	
-	<!-- The 'implementor' referenced here is either an.implementation.class OR a #springBeanReference -->
-	<jaxws:endpoint id="someServiceWS" implementor="#someService" address="/SomeServiceWS"/>
+	<!-- [JAX-WS] The 'implementor' referenced here is either an.implementation.class 
+		OR a #springBeanReference -->
+	<!-- The 'implementor=' value is either an.implementation.class OR a #springBeanReference -->
+	<jaxws:endpoint id="soapServiceWS" address="/ws/${soap.service.url.name}">
+		<jaxws:implementor>
+			<ref bean="soapRestServiceBean"/>
+		</jaxws:implementor>
+	</jaxws:endpoint>
 	
-	<jaxrs:server id="restContainer" address="/rest">
+	<jaxrs:server id="restContainer" address="/rest/${rest..service.url.name}">
         <jaxrs:serviceBeans>
-            <ref bean="someServiceRest"/><!-- Looks for Spring-@Service-annotated bean name - awesome!  -->
+            <ref bean="${rest.service.impl.bean}"/><!-- Also looks for [Spring] @Service-annotated bean name - awesome!  -->
         </jaxrs:serviceBeans>
     </jaxrs:server>
 	

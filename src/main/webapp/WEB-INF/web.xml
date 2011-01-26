@@ -5,7 +5,7 @@
   "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
 
 <web-app>
-	<display-name>m2-fisher-spring-cxf-webservice-server</display-name>
+	<display-name>webshop-services-uk</display-name>
 
 	<!-- Context Configuration locations for Spring XML files -->
 	<context-param>

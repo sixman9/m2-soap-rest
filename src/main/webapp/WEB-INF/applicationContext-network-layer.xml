@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+	http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+	http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	default-autowire="byName">
+	
+	<!-- use an external property-placeholder file  -->
+	<bean	class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:spring.properties" />
+	</bean>
+
+	<!-- enabling annotation driven configuration / -->
+	<context:annotation-config />	<!-- Spring-defined annotation-based bean 'setters' -->
+	<context:component-scan base-package="com.soap.rest" /> <!-- find Spring-annotated bean 'stereotypes', by package -->
+
+	<!-- Begin - Create httpInvokerRequestExecutor for remote service retries 
+		- can be shared between services -->
+	<bean id="httpRequestExecutor"
+		class="org.springframework.remoting.httpinvoker.CommonsHttpInvokerRequestExecutor">
+		<property name="httpClient" ref="httpClient" />
+		<property name="readTimeout" value="60000" /><!-- Set against 
+			underlying HttpClient instance -->
+	</bean>
+
+	<bean id="httpClient" class="org.apache.commons.httpclient.HttpClient">
+		<!-- property name="connectionTimeout" value="10000" / --><!-- connectionTimeout is deprecated -->
+	</bean>
+
+	<!-- Retrieve the httpClientParameters from httpClient, so we can add/modify 
+		them -->
+	<bean id="httpClientParameters"
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"
+		depends-on="httpClient">
+		<property name="targetObject" ref="httpClient" />
+		<property name="targetMethod" value="getParams" />
+	</bean>
+
+	<!--httpClientParameters.setParameter(String, Object) method calls -->
+	<bean
+		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean"
+		depends-on="httpClientParameters, retryHandlerParameterType, httpMethodRetryHandler">
+		<property name="targetObject" ref="httpClientParameters" />
+		<property name="targetMethod" value="setParameter" />
+		<property name="arguments">
+			<list>
+				<ref bean="retryHandlerParameterType" /><!-- Parameter-to-set key -->
+				<ref bean="httpMethodRetryHandler" /><!-- Object (bean) value -->
+			</list>
+		</property>
+	</bean>
+
+	<!-- beans 'retryHandlerParameterType' & 'httpMethodRetryHandler' are parameters 
+		use for httpClientParameters.setParameter(String, Object) method calls, invoked 
+		elsewhere via Spring -->
+	<bean id="retryHandlerParameterType"
+		class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+		<property name="staticField"
+			value="org.apache.commons.httpclient.params.HttpMethodParams.RETRY_HANDLER" />
+	</bean>
+
+	<bean id="httpMethodRetryHandler"
+		class="org.apache.commons.httpclient.DefaultHttpMethodRetryHandler">
+		<constructor-arg index="0" type="int" value="6" />
+		<constructor-arg index="1" type="boolean" value="true" />
+	</bean>
+	<!-- End - Create httpInvokerRequestExecutor -->
+
+</beans>

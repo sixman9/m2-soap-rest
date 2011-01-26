@@ -7,19 +7,26 @@
 	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.0.xsd  
 	http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
 	http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
-	default-autowire="byName">	
+	default-autowire="byName">
+
+	<!-- use an external property-placeholder file  -->
+	<bean	class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:spring.properties" />
+	</bean>	
 	
 	<!-- holding properties for database connectivity
 	<context:property-placeholder location="classpath:jdbc.properties" />
 	-->
 	<!-- JPA-Annotation related
-	<context:component-scan base-package="com.fisher" />
+	<context:component-scan base-package="com.soap.rest" />
 	<tx:annotation-driven transaction-manager="transactionManager" />
 	-->
 	
 	<!-- enabling annotation driven configuration / -->
-	<context:annotation-config />
+	<context:annotation-config />	<!-- Spring-defined annotation-based bean 'setters' -->
+	<context:component-scan base-package="com.soap.rest" /> <!-- find Spring-annotated bean 'stereotypes', by package -->
 	
-	<bean id="someNamedSpringClass" class="com.fisher.example.spring.SomeSpringSourcedClass"/>
+	
+	<!-- Beans here -->
 	
 </beans>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+	http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+	http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
+	http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	default-autowire="byName">
+
+	<!-- use an external property-placeholder file -->
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location" value="classpath:spring.properties" />
+	</bean>
+
+	<!-- holding properties for database connectivity <context:property-placeholder 
+		location="classpath:jdbc.properties" /> -->
+	<!-- JPA-Annotation related <context:component-scan base-package="com.soap.rest" 
+		/> <tx:annotation-driven transaction-manager="transactionManager" /> -->
+
+	<!-- enabling annotation driven configuration / -->
+	<context:annotation-config />	<!-- Spring-defined annotation-based bean 'setters' -->
+	<context:component-scan base-package="com.soap.rest" /> <!-- find Spring-annotated bean 'stereotypes', by package -->
+
+
+	<!-- Beans here -->
+
+	<!-- H2 in-memory SQL database -->
+	<bean id="h2.database.dataSource"
+		class="org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy">
+		<constructor-arg>
+			<bean class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+				<property name="driverClass" value="org.h2.Driver" />
+				<property name="url"
+					value="jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=2" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<!-- provides a H2 console to look into the db if necessary -->
+	<!-- bean id="org.h2.tools.Server-WebServer" class="org.h2.tools.Server"
+		factory-method="createWebServer" depends-on="h2.database.dataSource"
+		init-method="start" lazy-init="false">
+		<constructor-arg value="-web,-webPort,11111" />
+	</bean -->
+
+</beans>

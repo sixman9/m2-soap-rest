@@ -1,12 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.fisher</groupId>
-	<artifactId>m2-fisher-spring-cxf-webservice-server</artifactId>
+	<groupId>com.example.groupid</groupId>
+	<artifactId>m2-soap-rest</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>fisher-spring-cxf-webservice-server Maven Webapp</name>
-	<url>http://www.fisher.co.uk</url>
+	<name>SOAP and Rest service project example</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,11 +59,6 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
-		<!-- dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-remoting</artifactId>
-			<version>${spring.version}</version>
-		</dependency -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
@@ -115,9 +109,46 @@
 			<version>2.3.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.13</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.xml.ws</groupId>
+			<artifactId>jaxws-api</artifactId>
+			<version>2.2.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+		
+		<!-- Can be used as an in-memory, runtime, SQL database (csv files as tables, too) -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.148</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		
 	</dependencies>
 
 	<build>
+		<finalName>${finalname}</finalName>
 		<plugins>
 
 			<plugin>
@@ -190,55 +221,87 @@
 
 			<!-- Plugin to run and test via maven -->
 			<!-- Jetty Servlet Container Plugin -->
-			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
-				<artifactId>maven-jetty-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<stopKey>foo</stopKey>
-					<stopPort>9999</stopPort>
-				</configuration>
-				<executions>
-					<execution>
-						<id>start-jetty</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<configuration>
-							<scanIntervalSeconds>0</scanIntervalSeconds>
-							<daemon>true</daemon>
-						</configuration>
-					</execution>
-					<execution>
-						<id>stop-jetty</id>
-						<phase>post-integration-test</phase>
-						<goals>
-							<goal>stop</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+			<!-- plugin> <groupId>org.mortbay.jetty</groupId> <artifactId>maven-jetty-plugin</artifactId> 
+				<version>${jetty.version}</version> <configuration> <scanIntervalSeconds>10</scanIntervalSeconds> 
+				<stopKey>foo</stopKey> <stopPort>9999</stopPort> </configuration> <executions> 
+				<execution> <id>start-jetty</id> <phase>pre-integration-test</phase> <goals> 
+				<goal>run</goal> </goals> <configuration> <scanIntervalSeconds>0</scanIntervalSeconds> 
+				<daemon>true</daemon> </configuration> </execution> <execution> <id>stop-jetty</id> 
+				<phase>post-integration-test</phase> <goals> <goal>stop</goal> </goals> </execution> 
+				</executions> </plugin -->
 
 			<!-- Tomcat plugin for embedded tomcat -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>tomcat-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<id></id>
+						<phase>install</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+						<configuration>
+							<path>/${project.build.finalName}</path>
+							<server>localTomcat</server>
+							<update>true</update>
+							<!-- warFile>${project.build.directory}/${project.build.finalName}.war</warFile -->
+						</configuration>
+						<inherited>false</inherited>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- settting to allow debug of tests etc. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
-					<path>/${project.build.finalName}</path>
+					<forkMode>never</forkMode>
 				</configuration>
 			</plugin>
 		</plugins>
 
-		<finalName>fisher-spring-cxf-webservice-server</finalName>
 	</build>
 
 	<repositories>
+		<repository>
+			<id>javanet</id>
+			<url>http://download.java.net/maven/2/</url>
+		</repository>
+		<repository>
+			<id>javanet legacy</id>
+			<url>http://download.java.net/maven/1/</url>
+			<layout>legacy</layout>
+		</repository>
 		<repository>
 			<id>java.net2</id>
 			<name>Repository hosting the jee6 artifacts</name>
 			<url>http://download.java.net/maven/2</url>
 		</repository>
 	</repositories>
+
+	<profiles>
+		<profile>
+			<id>skip-tests</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<maven.test.skip>true</maven.test.skip>
+			</properties>
+		</profile>
+		<profile>
+			<id>do-tests</id>
+			<activation>
+				<property>
+					<name>doTest</name>
+				</property>
+			</activation>
+			<properties>
+				<maven.test.skip>false</maven.test.skip>
+			</properties>
+		</profile>
+	</profiles>
 </project>
