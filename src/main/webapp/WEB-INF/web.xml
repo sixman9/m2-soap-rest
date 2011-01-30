@@ -5,7 +5,7 @@
   "http://java.sun.com/j2ee/dtds/web-app_2_3.dtd">
 
 <web-app>
-	<display-name>webshop-services-uk</display-name>
+	<display-name>m2-soap-rest</display-name>
 
 	<!-- Context Configuration locations for Spring XML files -->
 	<context-param>
@@ -14,6 +14,11 @@
 			classpath*:/applicationContext.xml
 			/WEB-INF/applicationContext-*.xml
 		</param-value>
+	</context-param>
+
+	<context-param>
+    		<param-name>webAppRootKey</param-name>
+    		<param-value>m2-soap-rest</param-value>
 	</context-param>
 
 	<listener>
